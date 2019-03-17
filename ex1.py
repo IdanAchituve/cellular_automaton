@@ -6,7 +6,7 @@ import os
 
 NUM_ITERS = 100
 NUM_COLS = 201
-MAX_COLOR = 255.0
+MAX_VALUE = 2.0
 AUTOMATON_LEN = 7
 NUM_STATES = 3
 
@@ -27,7 +27,7 @@ class cellular_automaton:
         # compute the sum of all triplets in the vector and get the matching cell value from the rule's vector
         for idx in range(1, ncols+1):
             summed_vals = curr_gen[idx - 1] + curr_gen[idx] + curr_gen[idx + 1]
-            cell_val = np.array(self.rule[summed_vals]).reshape(1, 1)
+            cell_val = np.array(self.rule[AUTOMATON_LEN - summed_vals - 1]).reshape(1, 1)
             next_gen = cell_val if idx == 1 else np.concatenate((next_gen, cell_val), 1)
 
         new_mat = np.concatenate((self.mat.copy(), next_gen), 0)  # add the new generation to the generation matrix
@@ -44,7 +44,7 @@ def animate(mat_f, gap=0.5):
     mngr = plt.get_current_fig_manager()
     mngr.window.setGeometry(500, 200, 640, 545)
 
-    plt.imshow(mat_f)  # convert matrix to image
+    plt.imshow(mat_f, vmin=0, vmax=1.0)  # convert matrix to image
     plt.show()  # show image
     plt.pause(gap)  # time delay
 
@@ -64,7 +64,7 @@ def build_user_input_automaton(rule, rum_time):
         elapsed = time.time() - start
 
         current_mat = automaton.mat.copy()  # get latest matrix
-        mat_f = MAX_COLOR - current_mat * MAX_COLOR/2  # to float
+        mat_f = MAX_VALUE/2 - current_mat / MAX_VALUE  # to float between 0 - 1
         animate(mat_f)  # print all generations so far
 
         plt.close()
@@ -83,7 +83,7 @@ def build_all_automaton(save_img):
         for generation in range(NUM_ITERS):
             automaton.calc_next_gen()  # calculate the next generation
         mat = automaton.mat.copy()  # get the final matrix
-        mat_f = MAX_COLOR - mat * MAX_COLOR/2  # to float
+        mat_f = MAX_VALUE/2 - mat / MAX_VALUE  # to float between 0 - 1
 
         animate(mat_f, 0.001)
 
