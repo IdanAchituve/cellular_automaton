@@ -10,8 +10,9 @@ MAX_VALUE = 2.0
 AUTOMATON_LEN = 7
 NUM_STATES = 3
 
+
 # automaton class
-class cellular_automaton:
+class Sum_Automata:
 
     def __init__(self, rule):
         self.rule = rule.copy()
@@ -35,7 +36,7 @@ class cellular_automaton:
 
 
 # animate images
-def animate(mat_f, gap=0.5):
+def animate(mat_f, gap=0.1):
 
     plt.gray()  # print image in grayscale values
     plt.axis('off')  # don't print axis ticks
@@ -52,7 +53,7 @@ def animate(mat_f, gap=0.5):
 # build user requested automaton
 def build_user_input_automaton(rule, rum_time):
 
-    automaton = cellular_automaton(np.asarray(rule))
+    automaton = Sum_Automata(np.asarray(rule))
     start = time.time()  # number of seconds since unix epoch
     time.clock()  # start measuring time
     elapsed = 0
@@ -79,7 +80,7 @@ def build_all_automaton(save_img):
     powers = [pow(NUM_STATES, x) for x in range(AUTOMATON_LEN - 1, -1, -1)]  # get base 3 powers
 
     for rule in all_rules:
-        automaton = cellular_automaton(np.asarray(rule))
+        automaton = Sum_Automata(np.asarray(rule))
         for generation in range(NUM_ITERS):
             automaton.calc_next_gen()  # calculate the next generation
         mat = automaton.mat.copy()  # get the final matrix
@@ -88,8 +89,11 @@ def build_all_automaton(save_img):
         animate(mat_f, 0.001)
 
         # save image
+        rule_id = np.dot(np.asarray(rule), np.asarray(powers))  # calculate rule id
+        #if rule_id in (12, 15, 46, 57, 91, 111, 1999, 2009, 2022):
+        np.savetxt("./rules_array/rule_" + str(rule_id) + ".csv", mat)
+
         if save_img:
-            rule_id = np.dot(np.asarray(rule), np.asarray(powers))  # calculate rule id
             if not os.path.exists("./images"):
                 os.makedirs("./images")
             plt.savefig("./images/rule_" + str(rule_id) + ".png")
@@ -138,12 +142,12 @@ def get_user_input():
     # user defined automaton
     elif run_sel_val == 1:
 
-        rule = []  # save user input
+        rule = [0] * AUTOMATON_LEN  # save user input
         for i in range(AUTOMATON_LEN):
             valid_input = False
             while not valid_input:
 
-                state = input("Please enter a state value when the sum of the previous states is " + str(i) + ":\n")
+                state = input("Please enter a state value for the sum of " + str(i) + ":\n")
 
                 try:
                     state_val = int(state)
@@ -155,7 +159,7 @@ def get_user_input():
                     print("You entered an invalid state. Note that legal values are between 0 and 2")
                 else:
                     valid_input = True
-                    rule.append(state_val)
+                    rule[AUTOMATON_LEN - 1 - i] = state_val
 
         valid_input = False
         while not valid_input:
