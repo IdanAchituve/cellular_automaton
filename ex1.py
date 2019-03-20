@@ -5,7 +5,6 @@ import time
 import os
 
 NUM_ITERS = 100
-NUM_COLS = 201
 MAX_VALUE = 2.0
 AUTOMATON_LEN = 7
 NUM_STATES = 3
@@ -16,22 +15,21 @@ class Sum_Automata:
 
     def __init__(self, rule):
         self.rule = rule.copy()
-        self.mat = np.pad(np.array([1]), (int(NUM_COLS/2), int(NUM_COLS/2)), 'constant', constant_values=0)  # a matrix of all generations so far
-        self.mat = self.mat.reshape(1, -1)
+        self.mat = np.array([[1]])  # a matrix for saving all generations. Start with 010.
 
     def calc_next_gen(self):
 
-        nrows, ncols = self.mat.shape  # get number of rows and cols
-        curr_gen = self.mat[nrows-1, :].copy()  # get current generation
-        curr_gen = np.pad(curr_gen, (1, 1), 'wrap')  # pad the beginning with the final number and the end with the first number
+        new_mat = np.pad(self.mat.copy(), (1, 1), 'constant', constant_values=0)[1:-1]  # add 0 padding on both sides to all previous generations
+        _, ncols = new_mat.shape  # get number of rows and cols
+        curr_gen_temp = np.pad(new_mat[-1, :].copy(), (1, 1), 'constant', constant_values=0)  # add 0 padding for ease of computation
 
         # compute the sum of all triplets in the vector and get the matching cell value from the rule's vector
         for idx in range(1, ncols+1):
-            summed_vals = curr_gen[idx - 1] + curr_gen[idx] + curr_gen[idx + 1]
+            summed_vals = curr_gen_temp[idx - 1] + curr_gen_temp[idx] + curr_gen_temp[idx + 1]
             cell_val = np.array(self.rule[AUTOMATON_LEN - summed_vals - 1]).reshape(1, 1)
             next_gen = cell_val if idx == 1 else np.concatenate((next_gen, cell_val), 1)
 
-        new_mat = np.concatenate((self.mat.copy(), next_gen), 0)  # add the new generation to the generation matrix
+        new_mat = np.concatenate((new_mat, next_gen), 0)  # add the new generation to the generation matrix
         self.mat = new_mat
 
 
