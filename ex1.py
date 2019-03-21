@@ -15,7 +15,7 @@ class Sum_Automata:
 
     def __init__(self, rule):
         self.rule = rule.copy()
-        self.mat = np.array([[1]])  # a matrix for saving all generations. Start with 010.
+        self.mat = np.array([[1]])  # a matrix for saving all generations. Start with single 1 in the middle cell at generation 0.
 
     def calc_next_gen(self):
 
@@ -40,8 +40,11 @@ def animate(mat_f, gap=0.1):
     plt.axis('off')  # don't print axis ticks
 
     # set location on screen
-    mngr = plt.get_current_fig_manager()
-    mngr.window.setGeometry(500, 200, 640, 545)
+    try:
+        mngr = plt.get_current_fig_manager()
+        mngr.window.setGeometry(500, 200, 640, 545)
+    except:
+        mngr = mngr  # do nothing. Not all versions of python allow the above configuration
 
     plt.imshow(mat_f, vmin=0, vmax=1.0)  # convert matrix to image
     plt.show()  # show image
@@ -59,14 +62,14 @@ def build_user_input_automaton(rule, rum_time):
     plt.ion()
 
     while elapsed < rum_time:
-        automaton.calc_next_gen()  # calculate the next generation
         elapsed = time.time() - start
 
         current_mat = automaton.mat.copy()  # get latest matrix
         mat_f = MAX_VALUE/2 - current_mat / MAX_VALUE  # to float between 0 - 1
         animate(mat_f)  # print all generations so far
-
         plt.close()
+
+        automaton.calc_next_gen()  # calculate the next generation
 
 
 # build all 3^7 possible automaton
@@ -88,8 +91,7 @@ def build_all_automaton(save_img):
 
         # save image
         rule_id = np.dot(np.asarray(rule), np.asarray(powers))  # calculate rule id
-        #if rule_id in (12, 15, 46, 57, 91, 111, 1999, 2009, 2022):
-        np.savetxt("./rules_array/rule_" + str(rule_id) + ".csv", mat)
+        #np.savetxt("./rules_array/rule_" + str(rule_id) + ".csv", mat)
 
         if save_img:
             if not os.path.exists("./images"):
