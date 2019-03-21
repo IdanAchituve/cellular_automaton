@@ -34,7 +34,7 @@ class Sum_Automata:
 
 
 # animate images
-def animate(mat_f, gap=0.1):
+def animate(mat_f, gap=0.4):
 
     plt.gray()  # print image in grayscale values
     plt.axis('off')  # don't print axis ticks
