@@ -3,21 +3,20 @@ from itertools import *
 import sum_automata
 import part1
 
-START_GENERATION = 40  # initial generation for checking behaviour
-END_GENERATION = 200  # number of generations to run the automaton before reaching a decision
+ENTROPY_CHECK = 40  # initial generation for checking the entropy
+END_GENERATION = 200  # number of generations to run each automaton
 ENTROPY_MEDIUM_THRESHOLD = 0.25
 ENTROPY_HIGH_THRESHOLD = 1.0
-STD_THRESHOLD = 0.052
+STD_THRESHOLD = 0.058
 EPSILON = 0.000001
-WINDOW_SIZE = 10
-WINDOW_CHECK = 40
-WINDOW_GENERATION2 = 80
+WINDOW_SIZE = 10  # fixed window size from each side of the middle cell
+WINDOW_CHECK = 40  # initial generation for checking repetitions inside the window
 REPETITION_THRESHOLD = 2.6
 
 
-# calculate the entropy: sigma_over_i(p_i*log(p_i))
+# calculate the entropy: -sigma_over_i(p_i*log(p_i))
 def calc_entropy(dist):
-    dist_cor = dist.copy() + EPSILON  # add epslion to prevent undefined log
+    dist_cor = dist.copy() + EPSILON  # add epsilon to prevent undefined log
     n = np.sum(dist_cor)
     probs = dist_cor/n
     log_probs = np.log(probs)
@@ -28,59 +27,31 @@ def calc_entropy(dist):
 def build_stats():
     # generate all rules
     all_rules = list(map(list, product([0, 1, 2], repeat=part1.AUTOMATON_LEN)))
-    powers = [pow(part1.NUM_STATES, x) for x in range(part1.AUTOMATON_LEN - 1, -1, -1)]  # get base 3 powers
     simple_struc = complex_struc = chaotic_struc = 0
-
-    # calculate max entropy
-    uniform_dist = [1/part1.AUTOMATON_LEN] * part1.AUTOMATON_LEN
-    max_entropy = calc_entropy(np.asarray(uniform_dist))
 
     for idx, rule in enumerate(all_rules):
         automaton = sum_automata.sum_automata(np.asarray(rule))
-        rule_id = np.dot(np.asarray(rule), np.asarray(powers))  # calculate rule id
-        entropy_table = []
-        repetition1 = repetition2 = 0
-        repetitions = {}
+        entropy_table = []  # save entropy of each generation
+        repetitions = {}  # save the number of repetitions of each occurrence
 
         for generation in range(END_GENERATION):
             freq_table, last_gen = automaton.calc_next_gen()  # calculate the next generation and get frequency of each sum value
             last_gen = last_gen.squeeze()
 
             # 1st metric: entropy
-            if generation >= START_GENERATION:
+            if generation >= ENTROPY_CHECK:
                 entropy_table.append(calc_entropy(np.asarray(freq_table)))
 
+            # 2nd metric: window check
             if generation > WINDOW_CHECK:
-                num_cells = int(len(last_gen) / 2)
-                window = last_gen[num_cells - WINDOW_SIZE:num_cells + WINDOW_SIZE]
+                num_cells = int(len(last_gen) / 2)  # find middle cell
+                window = last_gen[num_cells - WINDOW_SIZE:num_cells + WINDOW_SIZE]  # take middle window of cells
                 window = tuple(window.tolist())
                 repetitions[window] = repetitions[window] + 1 if window in repetitions else 1
 
-            """
-            # 2nd metric: take small window
-            if generation == WINDOW_GENERATION1:
-                num_cells = int(len(last_gen)/2)
-                window1 = last_gen[num_cells-WINDOW_SIZE:num_cells+WINDOW_SIZE]
-            if generation > WINDOW_GENERATION1:
-                num_cells = int(len(last_gen)/2)
-                if np.array_equal(window1, last_gen[num_cells-WINDOW_SIZE:num_cells+WINDOW_SIZE]):
-                    repetition1 += 1
-
-            # 3rd metric: take an additional small window
-            if generation == WINDOW_GENERATION2:
-                num_cells = int(len(last_gen)/2)
-                window2 = last_gen[num_cells-WINDOW_SIZE:num_cells+WINDOW_SIZE]
-            if generation > WINDOW_GENERATION2:
-                num_cells = int(len(last_gen)/2)
-                if np.array_equal(window2, last_gen[num_cells-WINDOW_SIZE:num_cells+WINDOW_SIZE]):
-                    repetition2 += 1
-            """
-        mean_entropy = np.mean(np.asarray(entropy_table))
-        std = np.std((np.asarray(entropy_table)))
-        avg_repetitions = np.mean(list(repetitions.values()))
-
-        #print(str(mean_entropy) + " " + str(std) + " " + str(repetition1) + " " + str(repetition2))
-        #print(str(mean_entropy) + " " + str(std) + " " + str(np.mean(list(repetitions.values()))))
+        mean_entropy = np.mean(np.asarray(entropy_table))  # get mean entropy
+        std = np.std((np.asarray(entropy_table)))  # get std of entropy
+        avg_repetitions = np.mean(list(repetitions.values()))  # get the average number of repetitions
 
         # low entropy or low variance: simple structure
         if mean_entropy <= ENTROPY_MEDIUM_THRESHOLD or std < STD_THRESHOLD:
@@ -90,13 +61,14 @@ def build_stats():
             complex_struc += 1
         # high entropy: complex or chaotic
         else:
-            # if std is low or there are repetitions in the vectors-> complex
-            if avg_repetitions >= REPETITION_THRESHOLD:  #or repetition2 >= REPETITION_THRESHOLD:
+            # high number of recitations on average -> complex
+            if avg_repetitions >= REPETITION_THRESHOLD:
                 complex_struc += 1
-            # if std is medium -> chaotic
+            # low number of recitations on average -> chaotic
             else:
                 chaotic_struc += 1
 
+        # print progress bar
         if idx % 100 == 0:
             print(".", end="", flush=True)
 

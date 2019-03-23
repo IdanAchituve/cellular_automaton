@@ -6,9 +6,9 @@ import os
 import sum_automata
 import part2
 
-NUM_ITERS = 100
-MAX_VALUE = 2.0
-AUTOMATON_LEN = 7
+NUM_ITERS = 100  # number of generations
+MAX_VALUE = 2.0  # maximum cell value
+AUTOMATON_LEN = 7  # the size of the rule table
 NUM_STATES = 3
 
 
@@ -67,11 +67,9 @@ def build_all_automaton(save_img):
         mat_f = MAX_VALUE/2 - mat / MAX_VALUE  # to float between 0 - 1
 
         animate(mat_f, 0.001)
+        rule_id = np.dot(np.asarray(rule), np.asarray(powers))  # calculate rule id
 
         # save image
-        rule_id = np.dot(np.asarray(rule), np.asarray(powers))  # calculate rule id
-        #np.savetxt("./rules_array/rule_" + str(rule_id) + ".csv", mat)
-
         if save_img:
             if not os.path.exists("./images"):
                 os.makedirs("./images")
@@ -83,7 +81,7 @@ def get_user_input():
 
     valid_input = False
     print("Hi,")
-    print("Please make sure you are running Python 3.x and that you have matplotlib installed!\n")
+    print("Please make sure you are running Python 3.x and that you have numpy and matplotlib installed!\n")
 
     # get type of run preference
     while not valid_input:
@@ -153,8 +151,10 @@ def get_user_input():
         # run program
         build_user_input_automaton(rule, run_time)
 
+    # get stats
     elif run_sel_val == 2:
         part2.build_stats()
+
     # exit program
     else:
         exit(0)
