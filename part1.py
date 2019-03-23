@@ -111,7 +111,7 @@ def get_user_input():
     # running all automatons
     if run_sel_val == 0:
         save_img = False
-        saving_selection = input("Do you want to save all automatons? Enter Y for yes and N for no:\n")
+        saving_selection = input("Do you want to save all automatons? Enter Y for yes and any other key for no:\n")
         if saving_selection == "Y":
             print("Automaton images will be saved under .\images")
             save_img = True

@@ -72,6 +72,6 @@ def build_stats():
         if idx % 100 == 0:
             print(".", end="", flush=True)
 
-    print("\nSimple Structure: " + str(simple_struc))
-    print("Complex Structure: " + str(complex_struc))
-    print("Chaotic Structure: " + str(chaotic_struc))
+    print("\n#Automatons that have simple structure: " + str(simple_struc))
+    print("#Automatons that have complex structure: " + str(complex_struc))
+    print("#Automatons that have chaotic structure: " + str(chaotic_struc))
