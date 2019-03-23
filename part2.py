@@ -7,12 +7,12 @@ START_GENERATION = 40  # initial generation for checking behaviour
 END_GENERATION = 200  # number of generations to run the automaton before reaching a decision
 ENTROPY_MEDIUM_THRESHOLD = 0.25
 ENTROPY_HIGH_THRESHOLD = 1.0
-STD_THRESHOLD = 0.08
+STD_THRESHOLD = 0.052
 EPSILON = 0.000001
 WINDOW_SIZE = 10
 WINDOW_CHECK = 40
 WINDOW_GENERATION2 = 80
-REPETITION_THRESHOLD = 1.8
+REPETITION_THRESHOLD = 2.6
 
 
 # calculate the entropy: sigma_over_i(p_i*log(p_i))
